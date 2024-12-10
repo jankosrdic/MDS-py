@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password  # Replace with a strong password
+      MYSQL_DATABASE: stock_db            # Replace with your database name
+      MYSQL_USER: stock_user              # Replace with your database user
+      MYSQL_PASSWORD: stock_password      # Replace with a strong password
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app_network
+
+  fastapi-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastapi_app
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: mysql+pymysql://stock_user:stock_password@db:3306/stock_db
+    networks:
+      - app_network
+
+volumes:
+  db_data:
+
+networks:
+  app_network:
